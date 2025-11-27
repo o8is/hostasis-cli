@@ -20,6 +20,10 @@ inputs:
     required: true
     default: 'dist'
 
+  project:
+    description: 'Project name (derives feed signing key from reserve key)'
+    required: false
+
   gateway:
     description: 'Swarm gateway URL'
     required: false
@@ -70,6 +74,7 @@ runs:
       env:
         BATCH_ID: ${{ inputs.batch-id }}
         PRIVATE_KEY: ${{ inputs.key }}
+        PROJECT: ${{ inputs.project }}
         GATEWAY: ${{ inputs.gateway }}
         UPLOAD_PATH: ${{ inputs.path }}
         INDEX_DOC: ${{ inputs.index-document }}
@@ -83,6 +88,11 @@ runs:
           --index-document \"$INDEX_DOC\" \
           --feed \
           --output json"
+
+        # Add project if specified
+        if [ -n "$PROJECT" ]; then
+          CMD="$CMD --project \"$PROJECT\""
+        fi
 
         # Add SPA flag if enabled
         if [ "$SPA_MODE" = "true" ]; then

@@ -2,9 +2,12 @@
 
 import 'dotenv/config';
 import { Command } from 'commander';
+import { createRequire } from 'module';
 import { createUploadCommand } from './commands/upload.js';
 import { createFeedCommand } from './commands/feed.js';
-import { version } from '../package.json';
+
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json');
 
 const program = new Command();
 
