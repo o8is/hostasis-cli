@@ -1,0 +1,38 @@
+name: Deploy React App to Swarm
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Swarm
+        id: deploy
+        uses: hostasis/hostasis-cli@v1
+        with:
+          batch-id: ${{ secrets.HOSTASIS_BATCH_ID }}
+          key: ${{ secrets.HOSTASIS_KEY }}
+          path: ./build  # React uses 'build' directory
+          spa: true
+
+      - name: Comment deployment URL
+        run: |
+          echo "🚀 Deployed!"
+          echo "URL: ${{ steps.deploy.outputs.url }}"
+          echo "Feed: ${{ steps.deploy.outputs.feed-url }}"

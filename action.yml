@@ -1,0 +1,127 @@
+name: 'Deploy to Swarm with Hostasis'
+description: 'Upload files to Swarm with client-side stamping and automatic feed updates'
+author: 'Hostasis'
+
+branding:
+  icon: 'upload-cloud'
+  color: 'orange'
+
+inputs:
+  batch-id:
+    description: 'Postage batch ID (hex string, with or without 0x prefix)'
+    required: true
+
+  key:
+    description: 'Private key for signing (hex string, with or without 0x prefix)'
+    required: true
+
+  path:
+    description: 'Path to built files or directory to upload'
+    required: true
+    default: 'dist'
+
+  gateway:
+    description: 'Swarm gateway URL'
+    required: false
+    default: 'https://gateway.ethswarm.org'
+
+  index-document:
+    description: 'Index document for websites (e.g., index.html)'
+    required: false
+    default: 'index.html'
+
+  spa:
+    description: 'Enable Single Page Application mode (routes 404s to index)'
+    required: false
+    default: 'false'
+
+outputs:
+  reference:
+    description: 'Swarm reference hash of the uploaded content'
+    value: ${{ steps.upload.outputs.reference }}
+
+  url:
+    description: 'Full URL to access the uploaded content'
+    value: ${{ steps.upload.outputs.url }}
+
+  cid:
+    description: 'Content ID (CID) of the uploaded content'
+    value: ${{ steps.upload.outputs.cid }}
+
+  feed-url:
+    description: 'Feed URL for accessing the latest version'
+    value: ${{ steps.upload.outputs.feed-url }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Hostasis CLI
+      shell: bash
+      run: npm install -g @hostasis/cli
+
+    - name: Upload to Swarm
+      id: upload
+      shell: bash
+      env:
+        BATCH_ID: ${{ inputs.batch-id }}
+        PRIVATE_KEY: ${{ inputs.key }}
+        GATEWAY: ${{ inputs.gateway }}
+        UPLOAD_PATH: ${{ inputs.path }}
+        INDEX_DOC: ${{ inputs.index-document }}
+        SPA_MODE: ${{ inputs.spa }}
+      run: |
+        # Build command
+        CMD="hostasis upload \"$UPLOAD_PATH\" \
+          --batch-id \"$BATCH_ID\" \
+          --key \"$PRIVATE_KEY\" \
+          --gateway \"$GATEWAY\" \
+          --index-document \"$INDEX_DOC\" \
+          --feed \
+          --output json"
+
+        # Add SPA flag if enabled
+        if [ "$SPA_MODE" = "true" ]; then
+          CMD="$CMD --spa"
+        fi
+
+        # Execute and capture output
+        echo "::notice::Uploading to Swarm..."
+        OUTPUT=$(eval $CMD)
+
+        # Parse outputs
+        REFERENCE=$(echo "$OUTPUT" | jq -r '.reference')
+        URL=$(echo "$OUTPUT" | jq -r '.url')
+        CID=$(echo "$OUTPUT" | jq -r '.cid')
+        FEED_URL=$(echo "$OUTPUT" | jq -r '.feedUrl // empty')
+
+        # Set outputs
+        echo "reference=$REFERENCE" >> $GITHUB_OUTPUT
+        echo "url=$URL" >> $GITHUB_OUTPUT
+        echo "cid=$CID" >> $GITHUB_OUTPUT
+        echo "feed-url=$FEED_URL" >> $GITHUB_OUTPUT
+
+        # Display in logs
+        echo "::notice::✓ Upload successful!"
+        echo "::notice::URL: $URL"
+
+        # Create job summary
+        cat >> $GITHUB_STEP_SUMMARY << EOF
+        ## 🚀 Swarm Deployment Successful
+
+        **URL:** [$URL]($URL)
+
+        **Reference:** \`$REFERENCE\`
+
+        **CID:** \`$CID\`
+
+        $(if [ -n "$FEED_URL" ]; then echo "**Feed URL:** [$FEED_URL]($FEED_URL)"; fi)
+
+        ---
+
+        *Deployed with [Hostasis](https://hostasis.io)*
+        EOF

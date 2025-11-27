@@ -1,0 +1,44 @@
+{
+  "name": "@hostasis/cli",
+  "version": "0.1.0",
+  "description": "Upload files to Swarm and update feeds with client-side stamping",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "hostasis": "./bin/hostasis.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "swarm",
+    "ethswarm",
+    "cli",
+    "upload",
+    "feed",
+    "hostasis"
+  ],
+  "author": "Hostasis",
+  "license": "MIT",
+  "dependencies": {
+    "@ethersphere/bee-js": "^10.1.1",
+    "@hostasis/swarm-stamper": "file:../hostasis/packages/swarm-stamper",
+    "@noble/curves": "^1.9.7",
+    "@noble/hashes": "^1.8.0",
+    "axios": "^1.7.2",
+    "cafe-utility": "^33.3.2",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "dotenv": "^17.2.3",
+    "glob": "^10.3.10",
+    "ora": "^5.4.1",
+    "viem": "^2.40.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}

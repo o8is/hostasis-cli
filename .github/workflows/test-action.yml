@@ -1,0 +1,80 @@
+name: Test Action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # Only run on the main repo, not on forks (unless manually triggered)
+    if: github.event_name != 'push' || github.repository == 'hostasis/hostasis-cli'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create test files
+        run: |
+          mkdir -p test-site
+          cat > test-site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+            <head><title>Test Deployment</title></head>
+            <body>
+              <h1>Hostasis Test Deployment</h1>
+              <p>Deployed at: $(date)</p>
+            </body>
+          </html>
+          EOF
+
+      - name: Test action
+        id: test
+        uses: ./
+        with:
+          batch-id: ${{ secrets.HOSTASIS_BATCH_ID }}
+          key: ${{ secrets.HOSTASIS_KEY }}
+          path: ./test-site
+
+      - name: Verify outputs
+        run: |
+          # Check all outputs are present
+          if [ -z "${{ steps.test.outputs.reference }}" ]; then
+            echo "❌ Error: reference output is empty"
+            exit 1
+          fi
+
+          if [ -z "${{ steps.test.outputs.url }}" ]; then
+            echo "❌ Error: url output is empty"
+            exit 1
+          fi
+
+          if [ -z "${{ steps.test.outputs.cid }}" ]; then
+            echo "❌ Error: cid output is empty"
+            exit 1
+          fi
+
+          if [ -z "${{ steps.test.outputs.feed-url }}" ]; then
+            echo "❌ Error: feed-url output is empty"
+            exit 1
+          fi
+
+          echo "✅ All outputs present"
+          echo "Reference: ${{ steps.test.outputs.reference }}"
+          echo "URL: ${{ steps.test.outputs.url }}"
+          echo "CID: ${{ steps.test.outputs.cid }}"
+          echo "Feed URL: ${{ steps.test.outputs.feed-url }}"
+
+      - name: Test URL is accessible (optional)
+        continue-on-error: true
+        run: |
+          # Wait a moment for propagation
+          sleep 5
+
+          # Try to fetch the deployed content
+          if curl -f -s "${{ steps.test.outputs.url }}" > /dev/null; then
+            echo "✅ Deployment is accessible"
+          else
+            echo "⚠️  Warning: Deployment not yet accessible (may need more time to propagate)"
+          fi
