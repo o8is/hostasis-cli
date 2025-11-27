@@ -29,6 +29,7 @@ jobs:
           batch-id: ${{ secrets.HOSTASIS_BATCH_ID }}
           key: ${{ secrets.HOSTASIS_KEY }}
           path: ./build  # React uses 'build' directory
+          project: my-react-app  # Optional: creates separate feed for this project
           spa: true
 
       - name: Comment deployment URL

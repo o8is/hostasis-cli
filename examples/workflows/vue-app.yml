@@ -24,4 +24,5 @@ jobs:
           batch-id: ${{ secrets.HOSTASIS_BATCH_ID }}
           key: ${{ secrets.HOSTASIS_KEY }}
           path: ./dist
+          project: my-vue-app  # Optional: creates separate feed for this project
           spa: true

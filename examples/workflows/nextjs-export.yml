@@ -27,3 +27,4 @@ jobs:
           batch-id: ${{ secrets.HOSTASIS_BATCH_ID }}
           key: ${{ secrets.HOSTASIS_KEY }}
           path: ./out
+          project: my-nextjs-app  # Optional: creates separate feed for this project

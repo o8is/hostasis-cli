@@ -34,7 +34,7 @@ export async function updateFeed(options: {
   const topic = options.topic ? hexToBytes(options.topic) : new Uint8Array(32);
   const index = options.index ?? 0;
   const depth = options.depth ?? 20;
-  const gateway = options.gateway || 'https://gateway.ethswarm.org';
+  const gateway = options.gateway || 'https://bzz.sh';
 
   // Derive project key if project is specified
   let signerPrivateKey: string | undefined;

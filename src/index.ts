@@ -4,14 +4,14 @@ import 'dotenv/config';
 import { Command } from 'commander';
 import { createUploadCommand } from './commands/upload.js';
 import { createFeedCommand } from './commands/feed.js';
-import chalk from 'chalk';
+import { version } from '../package.json';
 
 const program = new Command();
 
 program
   .name('hostasis')
   .description('Hostasis CLI - Upload files to Swarm and manage feeds with client-side stamping')
-  .version('0.1.0');
+  .version(version);
 
 // Add commands
 program.addCommand(createUploadCommand());

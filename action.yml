@@ -23,7 +23,7 @@ inputs:
   gateway:
     description: 'Swarm gateway URL'
     required: false
-    default: 'https://gateway.ethswarm.org'
+    default: 'https://bzz.sh'
 
   index-document:
     description: 'Index document for websites (e.g., index.html)'
@@ -111,7 +111,7 @@ runs:
 
         # Create job summary
         cat >> $GITHUB_STEP_SUMMARY << EOF
-        ## 🚀 Swarm Deployment Successful
+        ## Swarm Deployment Successful
 
         **URL:** [$URL]($URL)
 
@@ -123,5 +123,5 @@ runs:
 
         ---
 
-        *Deployed with [Hostasis](https://hostasis.io)*
+        *Deployed with [Hostasis](https://hostasis.o8.is)*
         EOF
