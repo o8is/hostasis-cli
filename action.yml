@@ -21,7 +21,7 @@ inputs:
     default: 'dist'
 
   project:
-    description: 'Project name (derives feed signing key from reserve key)'
+    description: 'Project name (derives feed signing key from vault key)'
     required: false
 
   gateway:

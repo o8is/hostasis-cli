@@ -73,7 +73,7 @@ export function createUploadCommand(): Command {
         .makeOptionMandatory()
     )
     .addOption(
-      new Option('--project <name>', 'Project name (derives feed signing key from reserve key)')
+      new Option('--project <name>', 'Project name (derives feed signing key from vault key)')
         .env('HOSTASIS_PROJECT')
     )
     .option('--gateway <url>', 'Swarm gateway URL', DEFAULT_GATEWAY_URL)
@@ -240,7 +240,7 @@ export function createUploadCommand(): Command {
 
           await updateFeed({
             reference: result.reference,
-            reserveKey: options.key,
+            vaultKey: options.key,
             batchId: options.batchId,
             gateway: options.gateway,
             index: feedIndex,

@@ -52,9 +52,9 @@ jobs:
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `batch-id` | Yes | - | Your postage batch ID |
-| `key` | Yes | - | Your reserve private key |
+| `key` | Yes | - | Your vault private key |
 | `path` | Yes | `dist` | Path to built files |
-| `project` | No | - | Project name (derives feed key from reserve key) |
+| `project` | No | - | Project name (derives feed key from vault key) |
 | `gateway` | No | `https://bzz.sh` | Swarm gateway URL |
 | `index-document` | No | `index.html` | Index file for websites |
 | `spa` | No | `false` | Enable SPA mode |
@@ -88,9 +88,9 @@ jobs:
 Add these in repository settings: **Settings → Secrets and variables → Actions**
 
 - **`HOSTASIS_BATCH_ID`**: Your postage batch ID (get from [Hostasis app](https://hostasis.io))
-- **`HOSTASIS_KEY`**: Your reserve private key (use "Export Reserve Key" button)
+- **`HOSTASIS_KEY`**: Your vault private key (use "Export Reserve Key" button)
 
-**⚠️ Security Note:** Your reserve key can upload to your batch and update your feed. Store it securely in GitHub Secrets, never commit it!
+**⚠️ Security Note:** Your vault key can upload to your batch and update your feed. Store it securely in GitHub Secrets, never commit it!
 
 ### Framework Examples
 
@@ -112,7 +112,7 @@ npm install -g @hostasis/cli
 
 You'll need:
 1. A **postage batch** on Swarm
-2. Your **reserve private key** (exported from Hostasis web app)
+2. Your **vault private key** (exported from Hostasis web app)
 
 ## Commands
 
@@ -131,8 +131,8 @@ hostasis upload ./dist \
 **Options:**
 
 - `--batch-id <id>` (required): Your postage batch ID (hex)
-- `--key <key>` (required): Your reserve private key for stamping (hex)
-- `--project <name>`: Project name (derives feed signing key from reserve key)
+- `--key <key>` (required): Your vault private key for stamping (hex)
+- `--project <name>`: Project name (derives feed signing key from vault key)
 - `--gateway <url>`: Swarm gateway URL (default: `https://bzz.sh`)
 - `--index-document <file>`: Index document for websites (default: `index.html`)
 - `--spa`: Enable Single Page App mode (routes all 404s to index.html)
@@ -146,7 +146,7 @@ hostasis upload ./dist \
 
 You can set these instead of passing as flags:
 - `HOSTASIS_BATCH_ID`: Your postage batch ID
-- `HOSTASIS_PRIVATE_KEY`: Your reserve private key
+- `HOSTASIS_PRIVATE_KEY`: Your vault private key
 - `HOSTASIS_PROJECT`: Your project name
 
 **Smart Defaults:**
@@ -230,9 +230,9 @@ hostasis feed update \
 **Options:**
 
 - `--reference <hash>` (required): Content reference (Swarm hash)
-- `--key <key>` (required): Your reserve private key for stamping (hex)
+- `--key <key>` (required): Your vault private key for stamping (hex)
 - `--batch-id <id>` (required): Your postage batch ID (hex)
-- `--project <name>`: Project name (derives feed signing key from reserve key)
+- `--project <name>`: Project name (derives feed signing key from vault key)
 - `--gateway <url>`: Swarm gateway URL (default: `https://bzz.sh`)
 - `--index <number>`: Feed index (auto-fetches next index if not specified)
 - `--topic <hex>`: Feed topic (defaults to NULL_TOPIC)
@@ -243,7 +243,7 @@ hostasis feed update \
 
 You can set these instead of passing as flags:
 - `HOSTASIS_BATCH_ID`: Your postage batch ID
-- `HOSTASIS_PRIVATE_KEY`: Your reserve private key
+- `HOSTASIS_PRIVATE_KEY`: Your vault private key
 - `HOSTASIS_PROJECT`: Your project name
 
 **Smart Defaults:**
@@ -340,12 +340,12 @@ Add these to your repository secrets (`Settings > Secrets and variables > Action
 
 ## Multi-Project Support
 
-You can manage multiple projects (websites, apps) using a single reserve key and batch by specifying a `--project` name. Each project gets its own derived feed key.
+You can manage multiple projects (websites, apps) using a single vault key and batch by specifying a `--project` name. Each project gets its own derived feed key.
 
 **How it works:**
-1. Your **reserve key** pays for stamping (owns the batch)
+1. Your **vault key** pays for stamping (owns the batch)
 2. Each **project** gets a derived key for feed signing
-3. The project key is deterministically derived: `keccak256(reserveKey || projectSlug)`
+3. The project key is deterministically derived: `keccak256(vaultKey || projectSlug)`
 4. Each project has its own feed URL
 
 **Benefits:**
@@ -373,7 +373,7 @@ Each project will have its own feed URL that always points to the latest version
 
 1. Go to [Hostasis app](https://hostasis.io)
 2. Navigate to your Reserves page
-3. Click "Export Reserve Key" for the reserve you want to use
+3. Click "Export Reserve Key" for the vault you want to use
 4. Authenticate with your passkey
 5. Copy the private key
 6. Store it securely in your CI/CD secrets
@@ -386,9 +386,9 @@ Each project will have its own feed URL that always points to the latest version
 
 Unlike traditional Swarm uploads where the gateway stamps chunks, Hostasis uses **client-side stamping**:
 
-1. **Reserve keys** are derived from your passkey (one per reserve)
-2. Each reserve key owns its postage batch
-3. The CLI uses your reserve key to sign chunks locally
+1. **Reserve keys** are derived from your passkey (one per vault)
+2. Each vault key owns its postage batch
+3. The CLI uses your vault key to sign chunks locally
 4. Chunks are uploaded pre-signed to the gateway
 
 **Benefits:**
@@ -404,17 +404,17 @@ Feeds are mutable pointers that you control:
 - Feed updates are Single-Owner Chunks (SOCs) signed by the project key
 - You can update the feed to point to new content anytime
 - Users always get the latest version via the feed URL
-- The reserve key still stamps chunks (pays for storage)
+- The vault key still stamps chunks (pays for storage)
 
 ### Project-Based Keys
 
 When you specify a `--project` name:
 1. The project name is normalized to a slug (lowercase, hyphens, alphanumeric)
-2. A project key is derived: `projectKey = keccak256(reserveKey || projectSlug)`
-3. The reserve key still stamps chunks (pays for storage)
+2. A project key is derived: `projectKey = keccak256(vaultKey || projectSlug)`
+3. The vault key still stamps chunks (pays for storage)
 4. The project key signs feed updates (owns the feed)
 
-This allows you to manage multiple projects with a single reserve key while keeping their feeds separate.
+This allows you to manage multiple projects with a single vault key while keeping their feeds separate.
 
 ## Troubleshooting
 
@@ -432,7 +432,7 @@ The CLI automatically waits for your batch to propagate to the gateway. If this 
 ### "Feed update failed"
 
 For feed updates, you need:
-- The same reserve key that owns the batch
+- The same vault key that owns the batch
 - A valid postage batch ID
 - The batch must be recognized by the gateway
 

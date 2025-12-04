@@ -23,7 +23,7 @@ interface FeedUpdateOptions {
  */
 export async function updateFeed(options: {
   reference: string;
-  reserveKey: string;
+  vaultKey: string;
   batchId: string;
   gateway?: string;
   index?: number;
@@ -40,12 +40,12 @@ export async function updateFeed(options: {
   let signerPrivateKey: string | undefined;
   if (options.project) {
     const projectSlug = normalizeProjectSlug(options.project);
-    const projectKey = deriveProjectKey(options.reserveKey, projectSlug);
+    const projectKey = deriveProjectKey(options.vaultKey, projectSlug);
     signerPrivateKey = projectKey.privateKey;
   }
 
   await writeFeedUpdate({
-    reservePrivateKey: options.reserveKey,
+    vaultPrivateKey: options.vaultKey,
     signerPrivateKey,
     contentReference: options.reference,
     feedIndex: index,
@@ -72,7 +72,7 @@ export function createFeedCommand(): Command {
         .makeOptionMandatory()
     )
     .addOption(
-      new Option('--project <name>', 'Project name (derives feed signing key from reserve key)')
+      new Option('--project <name>', 'Project name (derives feed signing key from vault key)')
         .env('HOSTASIS_PROJECT')
     )
     .option('--gateway <url>', 'Swarm gateway URL', DEFAULT_GATEWAY_URL)
@@ -175,7 +175,7 @@ export function createFeedCommand(): Command {
         }
 
         await writeFeedUpdate({
-          reservePrivateKey: options.key,
+          vaultPrivateKey: options.key,
           signerPrivateKey,
           contentReference: options.reference,
           feedIndex: index,

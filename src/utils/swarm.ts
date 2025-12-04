@@ -81,12 +81,12 @@ export async function fetchBatchDepth(
  * Fetch the next feed index for a given owner/topic
  */
 export async function fetchNextFeedIndex(
-  reservePrivateKey: string,
+  vaultPrivateKey: string,
   gatewayUrl: string,
   topic: Uint8Array = new Uint8Array(32)
 ): Promise<number | null> {
   try {
-    const owner = getAddressFromPrivateKey(reservePrivateKey);
+    const owner = getAddressFromPrivateKey(vaultPrivateKey);
     const ownerHex = bytesToHex(owner);
     const topicHex = bytesToHex(topic);
 

@@ -25,7 +25,7 @@
   "license": "MIT",
   "dependencies": {
     "@ethersphere/bee-js": "^10.1.1",
-    "@hostasis/swarm-stamper": "^0.2.0",
+    "@hostasis/swarm-stamper": "^0.3.0",
     "@noble/curves": "^1.9.7",
     "@noble/hashes": "^1.8.0",
     "axios": "^1.7.2",
