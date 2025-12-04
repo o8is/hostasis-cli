@@ -1,6 +1,6 @@
 {
   "name": "@hostasis/cli",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Upload files to Swarm and update feeds with client-side stamping",
   "type": "module",
   "main": "dist/index.js",
