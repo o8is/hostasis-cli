@@ -61,7 +61,7 @@ export function createUploadCommand(): Command {
 
   command
     .description('Upload files to Swarm with client-side stamping')
-    .argument('<path>', 'Path to file or directory to upload')
+    .argument('[path]', 'Path to file or directory to upload (or set HOSTASIS_PATH)')
     .addOption(
       new Option('--batch-id <id>', 'Postage batch ID (hex)')
         .env('HOSTASIS_BATCH_ID')
@@ -78,7 +78,11 @@ export function createUploadCommand(): Command {
     )
     .option('--gateway <url>', 'Swarm gateway URL', DEFAULT_GATEWAY_URL)
     .option('--index-document <file>', 'Index document for website', 'index.html')
-    .option('--spa', 'Enable Single Page App mode (routes 404s to index)', false)
+    .addOption(
+      new Option('--spa', 'Enable Single Page App mode (routes 404s to index)')
+        .env('HOSTASIS_SPA')
+        .default(false)
+    )
     .option('--feed', 'Update feed after upload', false)
     .option('--feed-index <number>', 'Feed index for update (auto-fetches next index if not specified)')
     .option('--verbose', 'Show detailed error and request information', false)
@@ -88,10 +92,16 @@ export function createUploadCommand(): Command {
     .option('--depth <number>', 'Batch depth (auto-fetched from batch if not specified)')
     .option('--quiet', 'Suppress progress output', false)
     .option('--output <format>', 'Output format: json or text', 'text')
-    .action(async (uploadPath: string, options: UploadOptions) => {
+    .action(async (uploadPath: string | undefined, options: UploadOptions) => {
       const spinner = options.quiet ? null : ora('Preparing upload...').start();
 
       try {
+        // Resolve upload path from argument or environment variable
+        const resolvedPath = uploadPath || process.env.HOSTASIS_PATH;
+        if (!resolvedPath) {
+          throw new Error('Upload path is required. Provide as argument or set HOSTASIS_PATH environment variable.');
+        }
+
         // Validate inputs
         if (!options.batchId.match(/^(0x)?[0-9a-fA-F]{64}$/)) {
           throw new Error('Invalid batch ID format (expected 64 hex characters)');
@@ -102,7 +112,7 @@ export function createUploadCommand(): Command {
         }
 
         // Resolve path
-        const fullPath = path.resolve(uploadPath);
+        const fullPath = path.resolve(resolvedPath);
         const stats = await fs.promises.stat(fullPath);
 
         let files: File[];
